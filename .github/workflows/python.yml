@@ -21,10 +21,18 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get git version
+        id: version
+        run: |
+          GIT_VERSION=$(git describe --tags --match=v* --exclude=*rc* --always)
+          echo "version=$GIT_VERSION" >> $GITHUB_OUTPUT
+
       - name: Build PhotonLibPy package
         uses: hynek/build-and-inspect-python-package@v2
         with:
           path: ./photon-lib/py
+        env:
+          PHOTONVISION_GIT_VERSION: ${{ steps.version.outputs.version }}
 
   test:
     needs: build

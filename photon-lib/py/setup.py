@@ -1,15 +1,21 @@
 import re
 import subprocess
+import os
 
 from setuptools import find_packages, setup
 
-gitDescribeResult = (
-    subprocess.check_output(
-        ["git", "describe", "--tags", "--match=v*", "--exclude=*rc*", "--always"]
+try:
+    gitDescribeResult = (
+        subprocess.check_output(
+            ["git", "describe", "--tags", "--match=v*", "--exclude=*rc*", "--always"],
+            stderr=subprocess.DEVNULL
+        )
+        .decode("utf-8")
+        .strip()
     )
-    .decode("utf-8")
-    .strip()
-)
+except (subprocess.CalledProcessError, FileNotFoundError):
+    # Fallback when git is unavailable (e.g., in isolated build environments)
+    gitDescribeResult = os.environ.get("PHOTONVISION_GIT_VERSION", "v0.0.0")
 
 m = re.search(
     r"(v[0-9]{4}\.[0-9]{1}\.[0-9]{1})-?((?:beta)?(?:alpha)?)-?([0-9\.]*)",
